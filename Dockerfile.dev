@@ -15,6 +15,9 @@ RUN npm install
 # Copy application files
 COPY . .
 
+# Generate initial NLP model if it doesn't exist
+RUN node train.js
+
 EXPOSE 11434
 
 # Run with nodemon for automatic reload on file changes

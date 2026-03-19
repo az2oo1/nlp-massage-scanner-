@@ -13,6 +13,9 @@ RUN npm install
 # Copy the rest of the application files
 COPY . .
 
+# Generate NLP model during build
+RUN node train.js
+
 # Expose the port your server runs on
 EXPOSE 11434
 
