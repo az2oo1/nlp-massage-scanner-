@@ -11,6 +11,10 @@ console.log("🧠 NLP Model loaded from disk.");
 // We use the EXACT endpoint your bot is already looking for!
 app.post('/api/generate', async (req, res) => {
     // Your bot currently sends the message inside a "prompt" field
+    if (!req.body) {
+        return res.status(400).json({ error: "Request body is empty. Ensure Content-Type is application/json" });
+    }
+    
     const userPrompt = req.body.prompt;
     
     if (!userPrompt) {
