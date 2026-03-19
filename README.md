@@ -13,17 +13,10 @@ An NLP-powered API service built with Node.js and Express that analyzes text usi
 
 ## 📋 Prerequisites
 
-### Local Development
-- Node.js 18+
-- npm
-
-### Docker
 - Docker Engine 20.10+
 - Docker Compose 3.8+
 
-## 🏃 Quick Start
-
-### Using Docker (Recommended)
+## 🚀 Quick Start with Docker Compose
 
 1. **Clone the repository:**
    ```bash
@@ -31,41 +24,31 @@ An NLP-powered API service built with Node.js and Express that analyzes text usi
    cd nlp-massage-scanner-
    ```
 
-2. **Pull and run with docker-compose:**
+2. **Create `.env` file (optional):**
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Start the service:**
    ```bash
    docker-compose up -d
    ```
 
-3. **Verify the service is running:**
+4. **Verify the service is running:**
    ```bash
    curl -X POST http://localhost:11434/api/generate \
      -H "Content-Type: application/json" \
      -d '{"prompt": "مرحبا"}'
    ```
 
-### Local Development
-
-1. **Clone the repository:**
+5. **View logs:**
    ```bash
-   git clone https://github.com/az2oo1/nlp-massage-scanner-.git
-   cd nlp-massage-scanner-
+   docker-compose logs -f nlp-api
    ```
 
-2. **Install dependencies:**
+6. **Stop the service:**
    ```bash
-   npm install
-   ```
-
-3. **Run the server:**
-   ```bash
-   npm start
-   # or
-   node server.js
-   ```
-
-4. **Access the API:**
-   ```bash
-   http://localhost:11434/api/generate
+   docker-compose down
    ```
 
 ## 📡 API Endpoints
@@ -96,40 +79,48 @@ curl -X POST http://localhost:11434/api/generate \
   -w "\n"
 ```
 
-## 🐳 Docker Usage
+## 🐳 Docker Compose Commands
 
-### Build Locally
+### Start Services
 ```bash
-docker build -t nlp-massage-scanner .
-docker run -p 11434:11434 nlp-massage-scanner
-```
-
-### Pull from GitHub Container Registry
-```bash
-docker pull ghcr.io/az2oo1/nlp-massage-scanner-:latest
-docker run -p 11434:11434 ghcr.io/az2oo1/nlp-massage-scanner-:latest
-```
-
-### Using Docker Compose
-
-**Production:**
-```bash
+# Start in background
 docker-compose up -d
+
+# Start and watch logs
+docker-compose up
 ```
 
-**Development (with hot-reload):**
+### View Logs
 ```bash
-docker-compose -f docker-compose.dev.yml up -d
-```
+# View all logs
+docker-compose logs
 
-**View logs:**
-```bash
+# Follow logs in real-time
 docker-compose logs -f nlp-api
 ```
 
-**Stop services:**
+### Manage Services
 ```bash
+# Check service status
+docker-compose ps
+
+# Restart services
+docker-compose restart
+
+# Stop services
+docker-compose stop
+
+# Remove services and volumes
 docker-compose down
+```
+
+### Development with Auto-Reload
+```bash
+# Start with development image (hot-reload enabled)
+docker-compose -f docker-compose.dev.yml up -d
+
+# Follow development logs
+docker-compose -f docker-compose.dev.yml logs -f
 ```
 
 ## ⚙️ Configuration
@@ -193,117 +184,198 @@ See [WORKFLOW_SETUP.md](WORKFLOW_SETUP.md) for details.
 
 ## 🚀 Deployment
 
-### Production with Docker Compose
+### Production Deployment with Docker Compose
 
-1. **Set environment variables in `.env`:**
+1. **Clone repository:**
+   ```bash
+   git clone https://github.com/az2oo1/nlp-massage-scanner-.git
+   cd nlp-massage-scanner-
+   ```
+
+2. **Create `.env` file:**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env` with your settings:
    ```env
    GITHUB_REPOSITORY=az2oo1/nlp-massage-scanner-
    IMAGE_TAG=latest
    NODE_ENV=production
    ```
 
-2. **Deploy:**
+3. **Deploy:**
    ```bash
    docker-compose up -d
    ```
 
-3. **Monitor health:**
+4. **Monitor health:**
    ```bash
    docker-compose ps
-   # Should show healthy status
+   ```
+   
+   You should see the container with status `healthy` or `Up`.
+
+5. **Test the API:**
+   ```bash
+   curl -X POST http://localhost:11434/api/generate \
+     -H "Content-Type: application/json" \
+     -d '{"prompt": "مرحبا"}'
    ```
 
-### Kubernetes (Optional)
+### Scaling with Multiple Instances
 
-Create a `k8s-deployment.yaml`:
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nlp-massage-scanner
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: nlp-massage-scanner
-  template:
-    metadata:
-      labels:
-        app: nlp-massage-scanner
-    spec:
-      containers:
-      - name: nlp-api
-        image: ghcr.io/az2oo1/nlp-massage-scanner-:latest
-        ports:
-        - containerPort: 11434
-        env:
-        - name: NODE_ENV
-          value: "production"
+```bash
+# Start with multiple replicas
+docker-compose up -d --scale nlp-api=3
+```
+
+### Using Specific Image Tags
+
+```bash
+# Use development image
+IMAGE_TAG=develop docker-compose up -d
+
+# Use specific version
+IMAGE_TAG=v1.0.0 docker-compose up -d
+
+# Use specific commit
+IMAGE_TAG=main-abc123 docker-compose up -d
 ```
 
 ## 🔧 Development
 
-### Training the NLP Model
+### Local Development with Hot-Reload
 
-The model is trained using the dataset in `dataset.js`. To retrain:
+For development with automatic reload on file changes, use the dev docker-compose:
 
-```bash
-node train.js
-```
-
-This generates/updates the `model.nlp` file.
-
-### Running Tests
-
-```bash
-npm test
-```
-
-### Hot Reload During Development
-
-Using the dev docker-compose:
 ```bash
 docker-compose -f docker-compose.dev.yml up -d
 ```
 
-This enables nodemon for automatic reload on file changes.
+Files in the project directory will be mounted and watched for changes. Edit files locally, and the container will automatically reload.
+
+### Retraining the NLP Model
+
+To retrain the model with new data:
+
+```bash
+# Build development image with all tools
+docker-compose -f docker-compose.dev.yml up -d
+
+# Run training script
+docker exec nlp-massage-scanner-dev node train.js
+
+# Verify updated model
+docker exec nlp-massage-scanner-dev ls -la model.nlp
+```
+
+### Running in Interactive Mode
+
+```bash
+# Access container shell
+docker exec -it nlp-massage-scanner-dev bash
+
+# Run commands inside container
+docker exec nlp-massage-scanner-dev npm test
+```
 
 ## 🐛 Troubleshooting
 
 ### Port Already in Use
+
+If port 11434 is already in use:
+
 ```bash
-# Change port in docker-compose.yml
+# Option 1: Change port in docker-compose.yml
+# Edit the ports section:
 # ports:
-#   - "8080:11434"  # external:internal
+#   - "8080:11434"
+
+docker-compose down
 docker-compose up -d
 ```
 
-### Image Not Found
 ```bash
-# Login to GitHub Container Registry
-docker login ghcr.io
+# Option 2: Find and stop the process using port 11434
+# On Windows:
+netstat -ano | findstr :11434
 
-# Pull image
-docker pull ghcr.io/az2oo1/nlp-massage-scanner-:latest
+# On Linux/Mac:
+lsof -i :11434
 ```
 
 ### Container Won't Start
+
 ```bash
-# Check logs
+# View error logs
 docker-compose logs nlp-api
 
-# Rebuild
+# Rebuild the image
 docker-compose down
 docker-compose up --build -d
+
+# Check image validity
+docker images | grep nlp-massage-scanner
 ```
 
 ### Model Loading Issues
+
 ```bash
-# Verify model file exists
+# Verify model file exists locally
 ls -la model.nlp
 
-# Check volume mounts in docker-compose.yml
-docker-compose ps -a
+# Check volume mounts
+docker inspect nlp-massage-scanner
+
+# Verify volumes in docker-compose
+docker volume ls
+```
+
+### Health Check Failures
+
+```bash
+# View health check status
+docker-compose ps
+
+# If unhealthy, restart
+docker-compose restart nlp-api
+
+# Check health logs
+docker logs nlp-massage-scanner
+```
+
+### Out of Disk Space
+
+```bash
+# Clean up unused images and volumes
+docker system prune -a --volumes
+
+# Rebuild from scratch
+docker-compose down -v
+docker-compose up --build -d
+```
+
+### Permission Issues
+
+```bash
+# On Linux, run with proper permissions
+sudo docker-compose up -d
+
+# Or add user to docker group
+sudo usermod -aG docker $USER
+```
+
+### Test API Connectivity
+
+```bash
+# From host machine
+curl -X POST http://localhost:11434/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "مرحبا"}'
+
+# From inside container
+docker exec nlp-massage-scanner curl http://localhost:11434/api/generate
 ```
 
 ## 📦 Dependencies
