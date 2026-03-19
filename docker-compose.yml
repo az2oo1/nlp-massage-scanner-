@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   nlp-api:
-    image: ghcr.io/${GITHUB_REPOSITORY:-az2oo1/nlp-massage-scanner-}:${IMAGE_TAG:-latest}
+    image: ghcr.io/az2oo1/nlp-massage-scanner:${IMAGE_TAG:-latest}
     container_name: nlp-massage-scanner
     ports:
       - "11434:11434"
