@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  nlp-api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: nlp-massage-scanner-dev
+    ports:
+      - "11434:11434"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped

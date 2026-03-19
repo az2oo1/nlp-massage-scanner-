@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  nlp-api:
+    image: ghcr.io/${GITHUB_REPOSITORY:-az2oo1/nlp-massage-scanner-}:${IMAGE_TAG:-latest}
+    container_name: nlp-massage-scanner
+    ports:
+      - "11434:11434"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./model.nlp:/app/model.nlp
+      - ./dataset.js:/app/dataset.js
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:11434/api/generate', {method:'POST'}, (r) => {if(r.statusCode !== 404) process.exit(0)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

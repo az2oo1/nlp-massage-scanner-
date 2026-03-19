@@ -1,0 +1,21 @@
+# Development Dockerfile with nodemon for auto-reload
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install nodemon globally for development
+RUN npm install -g nodemon
+
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Install dependencies
+RUN npm install
+
+# Copy application files
+COPY . .
+
+EXPOSE 11434
+
+# Run with nodemon for automatic reload on file changes
+CMD ["nodemon", "server.js"]
