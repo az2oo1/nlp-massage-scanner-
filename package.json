@@ -4,6 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "nlp:chat": "node server.js --no-api",
+    "nlp:api": "node server.js --api-only",
     "nlp:prompt": "node server.js",
     "nlp:train": "node train.js"
   },

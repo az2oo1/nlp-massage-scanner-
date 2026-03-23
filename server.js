@@ -1,4 +1,5 @@
 const express = require('express');
+const readline = require('readline');
 const { NlpManager } = require('node-nlp');
 const { normalizeArabicText } = require('./preprocess');
 const { readConfigFile, getProfileSettings, getAllConfiguredLanguages } = require('./config');
@@ -15,9 +16,27 @@ function parseCliArgs(argv) {
     let profile;
     const promptParts = [];
     let promptModeEnabled = false;
+    let apiOnly = false;
+    let noApi = false;
+    let interactive = false;
 
     for (let i = 0; i < args.length; i += 1) {
         const current = args[i];
+
+        if (current === '--api-only') {
+            apiOnly = true;
+            continue;
+        }
+
+        if (current === '--no-api') {
+            noApi = true;
+            continue;
+        }
+
+        if (current === '--interactive') {
+            interactive = true;
+            continue;
+        }
 
         if (current === '--profile') {
             if (i + 1 < args.length) {
@@ -44,7 +63,10 @@ function parseCliArgs(argv) {
     return {
         prompt: prompt.length > 0 ? prompt : undefined,
         profile,
-        promptModeEnabled
+        promptModeEnabled,
+        apiOnly,
+        noApi,
+        interactive
     };
 }
 
@@ -110,6 +132,89 @@ function startApiServer() {
     });
 }
 
+function startInteractiveShell(initialProfile) {
+    let currentProfile = initialProfile || startupSettings.profileName;
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+        terminal: process.stdin.isTTY,
+        prompt: 'prompt> '
+    });
+
+    console.log('💬 Interactive mode enabled. Type your message and press Enter.');
+    console.log('💬 Commands: /profile <name>, /exit');
+    console.log(`💬 Active profile: ${currentProfile}`);
+    rl.prompt();
+
+    const queue = [];
+    let isProcessing = false;
+    let exitRequested = false;
+
+    const processNext = async () => {
+        if (isProcessing) {
+            return;
+        }
+
+        isProcessing = true;
+
+        while (queue.length > 0) {
+            const line = queue.shift();
+            const input = line.trim();
+
+            if (!input) {
+                continue;
+            }
+
+            if (input === '/exit') {
+                exitRequested = true;
+                break;
+            }
+
+            if (input.startsWith('/profile ')) {
+                const nextProfile = input.slice('/profile '.length).trim();
+                if (!nextProfile) {
+                    console.log('⚠️ Please provide a profile name.');
+                } else {
+                    const resolved = getProfileSettings(botConfig, nextProfile);
+                    currentProfile = resolved.profileName;
+                    console.log(`✅ Active profile: ${currentProfile}`);
+                }
+                continue;
+            }
+
+            try {
+                const { payload, settings, response } = await classifyPrompt(input, currentProfile);
+                console.log(`📩 [${settings.profileName}] Intent: ${response.intent} | Score: ${response.score}`);
+                console.log(JSON.stringify(payload, null, 2));
+            } catch (error) {
+                console.log(`❌ Failed to classify prompt: ${error.message}`);
+            }
+        }
+
+        isProcessing = false;
+
+        if (exitRequested) {
+            rl.close();
+            return;
+        }
+
+        rl.prompt();
+    };
+
+    rl.on('line', (line) => {
+        queue.push(line);
+        processNext().catch((error) => {
+            console.log(`❌ Interactive processing error: ${error.message}`);
+            rl.prompt();
+        });
+    });
+
+    rl.on('close', () => {
+        console.log('👋 Interactive session ended.');
+        process.exit(0);
+    });
+}
+
 async function runCliPrompt(prompt, requestedProfile) {
     const { payload, settings, response } = await classifyPrompt(prompt, requestedProfile);
     console.log(`📩 [${settings.profileName}] Intent: ${response.intent} | Score: ${response.score}`);
@@ -128,7 +233,21 @@ async function main() {
         return;
     }
 
-    startApiServer();
+    const shouldStartApi = !cli.noApi;
+    const shouldStartInteractive = cli.interactive || cli.noApi || (!cli.apiOnly && process.stdin.isTTY);
+
+    if (shouldStartApi) {
+        startApiServer();
+    }
+
+    if (shouldStartInteractive) {
+        startInteractiveShell(cli.profile);
+        return;
+    }
+
+    if (!shouldStartApi) {
+        console.log('No mode selected. Use --interactive or remove --no-api.');
+    }
 }
 
 main().catch((error) => {

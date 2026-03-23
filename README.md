@@ -364,7 +364,24 @@ Or locally:
 npm run nlp:train
 ```
 
-### Quick Local NLP Test (Directly via `server.js`)
+### Interactive Local NLP (Directly via `server.js`)
+
+Run once and keep chatting in the same terminal:
+
+```bash
+node server.js --no-api
+```
+
+Then type prompts directly:
+- write any message and press Enter
+- change profile with `/profile strict`
+- exit with `/exit`
+
+You can also run `node server.js` without flags. In a normal terminal this starts:
+- API server
+- interactive prompt mode
+
+### One-shot Local Prompt
 
 After training (or when `model.nlp` is present), run:
 
@@ -391,7 +408,7 @@ This prints direct classification from the same server logic and returns JSON.
 If you want HTTP API mode, run:
 
 ```bash
-node server.js
+node server.js --api-only
 ```
 
 Then call:
