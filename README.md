@@ -125,6 +125,94 @@ docker-compose -f docker-compose.dev.yml logs -f
 
 ## ⚙️ Configuration
 
+### Bot Behavior Profiles (`bot-config.json`)
+
+You can customize bot behavior for different needs without editing code.
+
+File: `bot-config.json`
+
+Note: the file includes a `_help` section so each option is documented inline.
+
+```json
+{
+   "modelFile": "model.nlp",
+   "activeProfile": "default",
+   "profiles": {
+      "default": {
+         "language": "ar",
+         "threshold": 0.6,
+         "fallbackIntent": "normal",
+         "normalizeInput": true,
+         "includeConfidence": false,
+         "intentMap": {}
+      },
+      "strict": {
+         "threshold": 0.75
+      },
+      "relaxed": {
+         "threshold": 0.45
+      }
+   }
+}
+```
+
+Option reference:
+
+| Option | Type | Default | Scope | Meaning |
+|--------|------|---------|-------|---------|
+| `modelFile` | string | `model.nlp` | top-level | Model file path used by server/tester and where training saves the model. |
+| `serverPort` | number | `11434` | top-level | Port used by `server.js` when running API mode. |
+| `activeProfile` | string | `default` | top-level | Profile used when request does not provide `profile`. |
+| `profiles` | object | required | top-level | Named behavior profiles. At least `default` should exist. |
+| `profiles.<name>.language` | string | `ar` | per-profile | Language code passed to NLP processing/training. |
+| `profiles.<name>.threshold` | number | `0.6` | per-profile | Minimum confidence to accept predicted intent. Lower value = more permissive. |
+| `profiles.<name>.fallbackIntent` | string | `normal` | per-profile | Returned intent when confidence is below threshold. |
+| `profiles.<name>.normalizeInput` | boolean | `true` | per-profile | If true, applies Arabic normalization before classification/training. |
+| `profiles.<name>.includeConfidence` | boolean | `false` | per-profile | If true, API response includes `meta` with score/profile/threshold details. |
+| `profiles.<name>.intentMap` | object | `{}` | per-profile | Renames intents in output. Example: map `service` to `spam`. |
+
+How profile inheritance works:
+- Every profile inherits missing values from `profiles.default`.
+- If request sends unknown profile, bot falls back to `activeProfile`.
+- If `activeProfile` is missing, fallback is `default`.
+
+Examples:
+
+1) Strict moderation profile
+```json
+"strict": {
+   "threshold": 0.8,
+   "fallbackIntent": "normal"
+}
+```
+
+2) Relabel intents for another app
+```json
+"marketplace": {
+   "threshold": 0.65,
+   "intentMap": {
+      "service": "forbidden_ad",
+      "course_ad": "promo"
+   }
+}
+```
+
+3) Debug profile with confidence metadata
+```json
+"debug": {
+   "includeConfidence": true
+}
+```
+
+You can also choose a profile per request:
+
+```json
+{
+   "prompt": "النص هنا",
+   "profile": "strict"
+}
+```
+
 ### Environment Variables
 
 Create a `.env` file (copy from `.env.example`):
@@ -270,18 +358,49 @@ docker exec nlp-massage-scanner-dev node train.js
 docker exec nlp-massage-scanner-dev ls -la model.nlp
 ```
 
-### Quick Local NLP Test
+Or locally:
+
+```bash
+npm run nlp:train
+```
+
+### Quick Local NLP Test (Directly via `server.js`)
 
 After training (or when `model.nlp` is present), run:
 
 ```bash
-npm run nlp:test -- "مرحبا كيف حالك"
+npm run nlp:prompt -- "مرحبا كيف حالك"
 ```
 
-This prints:
-- detected intent
-- confidence score
-- final category using the same threshold as the API (`0.6`)
+Test with a specific profile:
+
+```bash
+npm run nlp:prompt -- --profile strict "مرحبا كيف حالك"
+```
+
+Equivalent explicit form:
+
+```bash
+node server.js --prompt "مرحبا كيف حالك" --profile strict
+```
+
+This prints direct classification from the same server logic and returns JSON.
+
+### Run API Server Mode
+
+If you want HTTP API mode, run:
+
+```bash
+node server.js
+```
+
+Then call:
+
+```bash
+curl -X POST http://localhost:11434/api/generate \
+   -H "Content-Type: application/json" \
+   -d '{"prompt":"مرحبا", "profile":"default"}'
+```
 
 ### Running in Interactive Mode
 

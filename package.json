@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "nlp:test": "node test-nlp.js"
+    "nlp:prompt": "node server.js",
+    "nlp:train": "node train.js"
   },
   "keywords": [],
   "author": "",

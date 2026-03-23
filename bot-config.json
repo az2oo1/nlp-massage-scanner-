@@ -1,0 +1,35 @@
+{
+  "_help": {
+    "modelFile": "Model file used for loading/saving trained NLP model.",
+    "serverPort": "HTTP port used by server.js in API mode.",
+    "activeProfile": "Default profile when request/CLI does not provide one.",
+    "profiles": "Named behavior sets; each profile inherits missing values from profiles.default.",
+    "profileOptions": {
+      "language": "NLP language code.",
+      "threshold": "Confidence cutoff to accept predicted intent.",
+      "fallbackIntent": "Intent returned when score is below threshold.",
+      "normalizeInput": "If true, normalize Arabic text before classify/train.",
+      "includeConfidence": "If true, API includes meta details (score/profile/threshold).",
+      "intentMap": "Rename output intents, e.g. { \"service\": \"spam\" }."
+    }
+  },
+  "modelFile": "model.nlp",
+  "serverPort": 11434,
+  "activeProfile": "default",
+  "profiles": {
+    "default": {
+      "language": "ar",
+      "threshold": 0.6,
+      "fallbackIntent": "normal",
+      "normalizeInput": true,
+      "includeConfidence": false,
+      "intentMap": {}
+    },
+    "strict": {
+      "threshold": 0.75
+    },
+    "relaxed": {
+      "threshold": 0.45
+    }
+  }
+}
