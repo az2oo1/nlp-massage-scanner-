@@ -1,4 +1,5 @@
 const { NlpManager } = require('node-nlp');
+const { normalizeArabicText } = require('./preprocess');
 
 async function main() {
   const input = process.argv.slice(2).join(' ').trim();
@@ -17,7 +18,8 @@ async function main() {
     process.exit(1);
   }
 
-  const result = await manager.process('ar', input);
+  const normalizedInput = normalizeArabicText(input);
+  const result = await manager.process('ar', normalizedInput || input);
   const category = result.score > 0.6 ? result.intent : 'normal';
 
   console.log('Input:', input);

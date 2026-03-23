@@ -1,5 +1,6 @@
 const express = require('express');
 const { NlpManager } = require('node-nlp');
+const { normalizeArabicText } = require('./preprocess');
 
 const app = express();
 app.use(express.json());
@@ -21,10 +22,10 @@ app.post('/api/generate', async (req, res) => {
         return res.status(400).json({ error: "No prompt provided" });
     }
 
-    // Process the text through your custom NLP brain
-    const response = await manager.process('ar', userPrompt);
-    
-    // Check if the AI is confident. If not, default to 'normal'
+    const normalizedPrompt = normalizeArabicText(userPrompt);
+
+    // Pure NLP classification on normalized text.
+    const response = await manager.process('ar', normalizedPrompt || userPrompt);
     const category = response.score > 0.6 ? response.intent : 'normal';
 
     console.log(`📩 Analyzed: "${userPrompt.substring(0, 30)}..." -> [${category}] (Confidence: ${response.score})`);

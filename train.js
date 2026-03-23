@@ -1,4 +1,5 @@
 const { NlpManager } = require('node-nlp');
+const { normalizeArabicText } = require('./preprocess');
 
 // 1. استدعاء ملف البيانات السحري مباشرة بدون الحاجة لـ JSON.parse
 const dataset = require('./dataset.js'); 
@@ -10,7 +11,8 @@ async function trainModel() {
     
     // 2. إدخال البيانات للذكاء الاصطناعي
     dataset.forEach(item => {
-        manager.addDocument('ar', item.text, item.intent);
+        const normalizedText = normalizeArabicText(item.text);
+        manager.addDocument('ar', normalizedText || item.text, item.intent);
     });
 
     console.log(`🧠 Training NLP model with ${dataset.length} examples...`);
