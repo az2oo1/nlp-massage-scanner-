@@ -74,8 +74,11 @@ async function classifyPrompt(userPrompt, requestedProfile) {
     const settings = getProfileSettings(botConfig, requestedProfile);
     const normalizedPrompt = settings.normalizeInput ? normalizeArabicText(userPrompt) : userPrompt;
     const response = await manager.process(settings.language, normalizedPrompt || userPrompt);
-    const mappedIntent = settings.intentMap[response.intent] || response.intent;
-    const category = response.score > settings.threshold ? mappedIntent : settings.fallbackIntent;
+    const rawIntent = typeof response.intent === 'string' ? response.intent : '';
+    const isNoneIntent = rawIntent.toLowerCase() === 'none';
+    const mappedIntent = settings.intentMap[rawIntent] || rawIntent;
+    const resolvedIntent = isNoneIntent ? settings.fallbackIntent : mappedIntent;
+    const category = response.score > settings.threshold ? resolvedIntent : settings.fallbackIntent;
 
     const payload = {
         response: category
