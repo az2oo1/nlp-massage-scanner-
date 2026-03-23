@@ -270,6 +270,19 @@ docker exec nlp-massage-scanner-dev node train.js
 docker exec nlp-massage-scanner-dev ls -la model.nlp
 ```
 
+### Quick Local NLP Test
+
+After training (or when `model.nlp` is present), run:
+
+```bash
+npm run nlp:test -- "مرحبا كيف حالك"
+```
+
+This prints:
+- detected intent
+- confidence score
+- final category using the same threshold as the API (`0.6`)
+
 ### Running in Interactive Mode
 
 ```bash
