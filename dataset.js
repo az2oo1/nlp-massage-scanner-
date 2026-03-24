@@ -1054,6 +1054,26 @@ https://ehsan.sa/campaign/BE227206FF`
     text: `للي يحتاج نجهز لك تقرير او بحث او مشروع كامل بدون نسبة اقتباس وتسليم سريع واتساب`
   },
   {
+    intent: "service",
+    text: `شغال الان سكليف واجازه مرضيه عبر صحتي`
+  },
+  {
+    intent: "service",
+    text: `نوفر سكليف وعذر طبي موثق في صحتي`
+  },
+  {
+    intent: "service",
+    text: `عذر طبي مع التوثيق واجازه مرضيه جاهزه`
+  },
+  {
+    intent: "service",
+    text: `نسوي سكليف طبي وتقرير طبي معتمد`
+  },
+  {
+    intent: "service",
+    text: `خدمات طبيه سكليف صحتي تواصل واتساب`
+  },
+  {
     intent: "normal",
     text: `مين عنده شرح لكيف اكتب تقرير بدون نسبة اقتباس بنفسي؟`
   },
@@ -1072,6 +1092,22 @@ https://ehsan.sa/campaign/BE227206FF`
   {
     intent: "normal",
     text: `حق التوثيق`
+  },
+  {
+    intent: "normal",
+    text: `اوكيه شغال`
+  },
+  {
+    intent: "normal",
+    text: `اوكي شغال`
+  },
+  {
+    intent: "normal",
+    text: `اوكي تمام شكرا`
+  },
+  {
+    intent: "normal",
+    text: `الحين فهمت`
   },
   {
     intent: "normal",
