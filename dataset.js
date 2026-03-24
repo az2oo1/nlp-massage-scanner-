@@ -1071,6 +1071,14 @@ https://ehsan.sa/campaign/BE227206FF`
   },
   {
     intent: "normal",
+    text: `حق التوثيق`
+  },
+  {
+    intent: "normal",
+    text: `ايش ذا؟`
+  },
+  {
+    intent: "normal",
     text: `ابغى مراجع تساعدني في كتابة رسالة الماجستير بطريقة صحيحة`
   },
   {
